@@ -39,30 +39,3 @@ class PurchaseReport(models.Model):
         , po.on_time_rate
         """
         return group_by_str
-
-
-class PurchaseOrder(models.Model):
-    _inherit = 'purchase.order'
-
-    on_time = fields.Boolean('A tiempo',
-                            compute = '_compute_on_time',
-                            store = True)
-
-    on_time_rate = fields.Float(related='partner_id.on_time_rate', store = True,compute_sudo=False)
-
-
-    @api.depends('date_planned','effective_date')
-    def _compute_on_time(self):
-        for record in self:
-            if record.date_planned and record.effective_date:
-                if record.date_planned < record.effective_date:
-                    record.on_time = True
-            record.on_time = False
-
-    @api.model
-    def update_existing_records(self):
-        # Busca todos los registros existentes
-        records = self.search([])
-        # Llama al método compute para recalcular el valor
-        records._compute_on_time()
-        
