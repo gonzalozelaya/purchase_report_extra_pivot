@@ -18,6 +18,10 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
+    'data': [
+        'security/ir.model.access.csv',
+        'views/requisition_dashboard_views.xml',
+    ],
     # any module necessary for this one to work correctly
-    'depends': ['purchase'],
+    'depends': ['base', 'purchase', 'stock','purchase_requisition', 'stock'],  # Agrega 'purchase' y otros módulos necesarios,
 }
