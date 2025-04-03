@@ -13,12 +13,22 @@ class RequisitionAnalysis(models.Model):
     total_requisition = fields.Float("Total", readonly=True)  # Nuevo campo para el total
     po_count = fields.Integer("Cantidad de OC", readonly=True)
     additional_count = fields.Integer("Adicionales", readonly=True)
-    delivery_days_avg = fields.Float(  # Cambiado a Float
-        "Promedio Días (Pedido→Entrega)", 
+    
+    #Campos modificados y nuevos
+    material_delivery_days_avg = fields.Float(  # Renombrado
+        "Promedio Días Materiales (Pedido→Entrega)", 
         group_operator='avg',
         readonly=True,
-        digits=(12, 0)  # Muestra como entero en la interfaz
+        digits=(12, 0)
     )
+    
+    service_delivery_days_avg = fields.Float(  # Nuevo campo
+        "Promedio Días Servicios (Entrega→Completación)", 
+        group_operator='avg',
+        readonly=True,
+        digits=(12, 0)
+    )
+
 
 
     def _select(self):
@@ -48,10 +58,16 @@ class RequisitionAnalysis(models.Model):
                 CASE 
                     WHEN (pr.schedule_date - pr.ordering_date) < 0 THEN 0 
                     ELSE (pr.schedule_date - pr.ordering_date)
-                END, 0) AS delivery_days_avg
+                END, 0) AS material_delivery_days_avg
+
+            ,COALESCE(
+                CASE 
+                    WHEN (pr.service_completion_date - pr.service_delivery_date) < 0 THEN 0
+                    ELSE (pr.service_completion_date - pr.service_delivery_date)
+                END, 0) AS service_delivery_days_avg
         """
         # Esta porcion de código me sirve para traer el promedio en negativo
-        # COALESCE(pr.schedule_date - pr.ordering_date, 0) AS delivery_days_avg
+        # COALESCE(pr.schedule_date - pr.ordering_date, 0) AS material_delivery_days_avg
 
     def _from(self):
         return """

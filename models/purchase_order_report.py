@@ -59,16 +59,33 @@ class PurchaseOrderReport(models.Model):
                  WHERE sp.origin = po.name 
                    AND sp.state = 'done') AS last_picking_date,
                 
+                -- Cálculo de días con validación de negativos
+                COALESCE(
+                    (SELECT 
+                        CASE 
+                            WHEN CEIL(EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400) < 0 
+                            THEN 0 
+                            ELSE CEIL(EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400)
+                        END
+                     FROM stock_picking sp
+                     WHERE sp.origin = po.name
+                       AND sp.state = 'done')
+                , 0) AS first_picking_days,
                 
-                -- Cálculo de días entre la entrega esperada y los stock picking
-                CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400
-                      FROM stock_picking sp
-                      WHERE sp.origin = po.name
-                        AND sp.state = 'done')) AS first_picking_days,
-                CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400
-                      FROM stock_picking sp
-                      WHERE sp.origin = po.name
-                        AND sp.state = 'done')) AS last_picking_days,
+                
+
+                
+                COALESCE(
+                    (SELECT 
+                        CASE 
+                            WHEN CEIL(EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400) < 0 
+                            THEN 0 
+                            ELSE CEIL(EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400)
+                        END
+                     FROM stock_picking sp
+                     WHERE sp.origin = po.name
+                       AND sp.state = 'done')
+                , 0) AS last_picking_days,
 
 
                 -- Fechas de Requerimiento y Orden de Compra
@@ -85,6 +102,18 @@ class PurchaseOrderReport(models.Model):
                 
         """
         
+        # ESTE ES EL CALCULO DEJANDO LOS NEGATIVOS
+        #-- Cálculo de días entre la entrega esperada y los stock picking
+        #        CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400
+        #              FROM stock_picking sp
+        #              WHERE sp.origin = po.name
+        #                AND sp.state = 'done')) AS first_picking_days,
+
+        
+        #CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400
+        #              FROM stock_picking sp
+        #              WHERE sp.origin = po.name
+        #                AND sp.state = 'done')) AS last_picking_days, 
         
     def _from(self):
         return """
