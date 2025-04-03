@@ -1,0 +1,90 @@
+def _select(self):
+    return """
+        SELECT
+            MIN(po.id) AS id,
+            MIN(po.id) AS purchase_order_id,
+            po.x_studio_responsable_de_compraspc AS user_id,
+            po.x_studio_obra AS obra_id,
+            COUNT(DISTINCT po.id) AS order_count,
+            MIN(po.name) AS name,
+            po.currency_id AS currency_id,
+            SUM(po.amount_total) AS order_total,
+            COALESCE(SUM(am.amount_total), 0) AS invoice_total,
+            po.partner_id AS supplier_id,
+            MIN(po.date_planned) AS date_planned,
+            -- Usamos subconsultas para evitar la duplicación de registros
+            (SELECT MIN(sp.date_done) 
+             FROM stock_picking sp 
+             WHERE sp.origin = po.name 
+               AND sp.state = 'done') AS first_picking_date,
+            (SELECT MAX(sp.date_done) 
+             FROM stock_picking sp 
+             WHERE sp.origin = po.name 
+               AND sp.state = 'done') AS last_picking_date,
+            -- Cálculo de días sin afectar la suma
+            CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400
+                  FROM stock_picking sp
+                  WHERE sp.origin = po.name
+                    AND sp.state = 'done')) AS first_picking_days,
+            CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400
+                  FROM stock_picking sp
+                  WHERE sp.origin = po.name
+                    AND sp.state = 'done')) AS last_picking_days
+    """
+
+def _from(self):
+    return """
+        FROM purchase_order po
+        LEFT JOIN account_move am 
+            ON am.invoice_origin = po.name
+            AND am.move_type IN ('in_invoice', 'in_refund')
+            AND am.state = 'posted'
+    """
+
+def _group_by(self):
+    return """
+        GROUP BY
+            po.id,
+            po.x_studio_responsable_de_compraspc,
+            po.x_studio_obra,
+            po.currency_id,
+            po.partner_id
+    """
+
+
+
+
+
+
+VIEJA FORMA DE HACER EL CALCULO DE FECHAS
+
+                CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400
+                      FROM stock_picking sp
+                      WHERE sp.origin = po.name
+                        AND sp.state = 'done')) AS first_picking_days,
+                CEIL((SELECT EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400
+                      FROM stock_picking sp
+                      WHERE sp.origin = po.name
+                        AND sp.state = 'done')) AS last_picking_days,
+                -- Para aplicar la lógica de cero a negativos, se podría usar:
+                -- ,(SELECT CASE WHEN EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400 < 0 
+                --       THEN 0 
+                --       ELSE EXTRACT(EPOCH FROM (po.date_planned - MIN(sp.date_done)))/86400 
+                --  END
+                --   FROM stock_picking sp
+                --   WHERE sp.origin = po.name AND sp.state = 'done') AS first_picking_days,
+                -- (SELECT CASE WHEN EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400 < 0 
+                --       THEN 0 
+                --       ELSE EXTRACT(EPOCH FROM (po.date_planned - MAX(sp.date_done)))/86400 
+                --  END
+                --   FROM stock_picking sp
+                --   WHERE sp.origin = po.name AND sp.state = 'done') AS last_picking_days
+                MIN(po.date_planned) AS date_planned,
+                (SELECT MIN(sp.date_done) 
+                 FROM stock_picking sp 
+                 WHERE sp.origin = po.name 
+                   AND sp.state = 'done') AS first_picking_date,
+                (SELECT MAX(sp.date_done) 
+                 FROM stock_picking sp 
+                 WHERE sp.origin = po.name 
+                   AND sp.state = 'done') AS last_picking_date

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    
+    <record id="module_whatsapp_chat" model="ir.module.category">
+            <field name="name">Chat Whatsapp</field>
+            <field name="sequence">20</field>
+            <field name="parent_id" ref="base.module_category_productivity"/>
+    </record>
+
+
+    <record id="group_whatsapp_chat_user" model="res.groups">
+        <field name="name">Acceso a las Auditorias</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="whatsapp_chat.module_category_whatsapp_chat"/>
+    </record>
+
+    <record id="group_whatsapp_chat_admin" model="res.groups">
+        <field name="name">Administracion</field>
+        <field name="implied_ids" eval="[(4, ref('Project_Custom.group_project_audit_user'))]"/>
+        <field name="category_id" ref="Project_Custom.module_category_project_audit"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+
+</odoo>

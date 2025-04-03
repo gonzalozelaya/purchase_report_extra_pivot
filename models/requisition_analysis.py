@@ -44,8 +44,14 @@ class RequisitionAnalysis(models.Model):
             END AS additional_count
             -- Nuevo cálculo de días promedio
             ,-- Cálculo correcto para fechas Date:
-            COALESCE(pr.schedule_date - pr.ordering_date, 0) AS delivery_days_avg
+            COALESCE(
+                CASE 
+                    WHEN (pr.schedule_date - pr.ordering_date) < 0 THEN 0 
+                    ELSE (pr.schedule_date - pr.ordering_date)
+                END, 0) AS delivery_days_avg
         """
+        # Esta porcion de código me sirve para traer el promedio en negativo
+        # COALESCE(pr.schedule_date - pr.ordering_date, 0) AS delivery_days_avg
 
     def _from(self):
         return """

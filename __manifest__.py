@@ -21,6 +21,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/requisition_dashboard_views.xml',
+        'views/purchase_order_report_views.xml',
     ],
     # any module necessary for this one to work correctly
     'depends': ['base', 'purchase', 'stock','purchase_requisition', 'stock'],  # Agrega 'purchase' y otros módulos necesarios,
