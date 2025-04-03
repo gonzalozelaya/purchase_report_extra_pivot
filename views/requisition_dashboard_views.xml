@@ -28,7 +28,8 @@
                 <field name="total_requisition" widget="monetary"/> 
                 <field name="po_count"/> 
                 <field name="additional_count"/>
-                <field name="delivery_days_avg"  string="Promedio Días (Pedido→Entrega Estimada)"/>
+                <field name="material_delivery_days_avg"  string="Promedio Días (Pedido→Entrega Estimada) Material"/>
+                <field name="service_delivery_days_avg"  string="Promedio Días (Pedido→Entrega Estimada) Servicio"/>
             </tree>
         </field>
     </record>
