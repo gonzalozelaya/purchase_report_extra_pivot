@@ -49,6 +49,15 @@
                 <!-- Sección de Requerimiento -->
                 
                 <group string="Requerimiento">
+                    <group>
+                        <field name="requisition_date_end"/>
+                        <field name="order_create_date"/>
+                        <field name="order_confirmation_date"/>
+                    </group>
+                    <group>
+                        <field name="avg_days_requisition_to_order"/>
+                        <field name="avg_days_requisition_to_confirmation"/>
+                    </group>
                 </group>
             
             </form>
