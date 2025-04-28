@@ -15,6 +15,22 @@
         </field>
     </record>
 
+
+    <!-- Gráfico de Barras: Total Ordenado vs Facturado -->
+    <record id="view_purchase_financial_graph" model="ir.ui.view">
+        <field name="name">purchase.financial.graph</field>
+        <field name="model">purchase.order.report</field>
+        <field name="arch" type="xml">
+            <graph type="bar" string="Comparativo Ordenado vs Facturado">
+                <field name="order_create_date" type="col" interval="month" string="Fecha de Creación"/>
+                <field name="order_total" type="measure"/>
+                <field name="invoice_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    
+    <!-- Vista Formulario-->
     <record id="view_purchase_order_report_form" model="ir.ui.view">
         <field name="name">purchase.order.report.form</field>
         <field name="model">purchase.order.report</field>
@@ -22,7 +38,7 @@
             <form string="Reporte de Órdenes de Compra">
                 <group string="Datos de la Orden">
                     <group>
-                        <field name="name"/>
+                        <field name="purchase_order_id" />
                         <field name="supplier_id"/>
                         <field name="user_id"/>
                         <field name="obra_id"/>
@@ -30,7 +46,7 @@
                         
                     </group>
                     <group>
-                        
+                        <field name="order_create_date" string="Fecha de Creación"/>
                         <field name="order_count"/>
                         <field name="order_total"/>
                         <field name="invoice_total"/>
@@ -71,11 +87,11 @@
         <field name="model">purchase.order.report</field>
         <field name="arch" type="xml">
             <tree string="Análisis de Requerimientos">
-                <field name="name" />
+                <field name="purchase_order_id" />
                 <field name="user_id" />
                 <field name="obra_id" />
                 <field name="supplier_id" />
-                
+                <field name="order_create_date" string="Fecha de Creación"/>                
             </tree>
         </field>
     </record>

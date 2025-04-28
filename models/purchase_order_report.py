@@ -27,8 +27,8 @@ class PurchaseOrderReport(models.Model):
     # Fechas Para calculos entre la confirmación del requerimiento de compra con la fecha de creación de la orden de compra
     # la fecha de confirmación de la orden de compra
     requisition_date_end =fields.Datetime(string="Fecha de Confirmación del requisito", readonly=True)
-    order_create_date =fields.Datetime(string="Fecha de Confirmación del requisito", readonly=True)
-    order_confirmation_date =fields.Datetime(string="Fecha de Confirmación del requisito", readonly=True)
+    order_create_date =fields.Datetime(string="Fecha de creación de la orden", readonly=True)
+    order_confirmation_date =fields.Datetime(string="Fecha de Confirmación de la orden", readonly=True)
 
     avg_days_requisition_to_order = fields.Float(string='Días Confirmación Requerimiento y Creación OP', readonly=True, digits=(12, 2),group_operator='avg')
     avg_days_requisition_to_confirmation = fields.Float(string='Días Confirmación Requerimiento y Confirmación OP', readonly=True, digits=(12, 2),group_operator='avg')
@@ -37,6 +37,7 @@ class PurchaseOrderReport(models.Model):
         return """
             SELECT
                 MIN(po.id) AS id,
+                po.create_date AS order_create_date,
                 MIN(po.id) AS purchase_order_id,
                 po.x_studio_responsable_de_compraspc AS user_id,
                 po.x_studio_obra AS obra_id,
@@ -90,7 +91,6 @@ class PurchaseOrderReport(models.Model):
 
                 -- Fechas de Requerimiento y Orden de Compra
                 req.date_end AS requisition_date_end,
-                po.create_date AS order_create_date,
                 po.x_studio_fecha_confirmacin AS order_confirmation_date,
     
                 -- Promedio de días entre (date_end de requisition y create_date de purchase.order)
@@ -130,6 +130,7 @@ class PurchaseOrderReport(models.Model):
         return """
             GROUP BY
                 po.id,
+                po.partner_id,
                 po.x_studio_responsable_de_compraspc,
                 po.x_studio_obra,
                 po.currency_id,
